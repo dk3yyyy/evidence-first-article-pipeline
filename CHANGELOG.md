@@ -11,6 +11,7 @@ All notable changes to this project are documented here.
 - Long-sentence distinctness checks across master and adapted editions.
 - Configurable unsupported-experience and fabrication phrase scanning.
 - CLI and regression coverage for every new gate.
+- CI coverage for Python 3.11 through 3.14.
 
 ## 0.1.0 - 2026-08-02
 
