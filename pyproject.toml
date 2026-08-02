@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evidence-first-article-pipeline"
+version = "0.1.0"
+description = "A deterministic, evidence-first workflow for agent-assisted technical articles."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [{name = "Joshua Nwachinemere"}]
+keywords = ["writing", "research", "citations", "ai-agents", "editorial"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Text Processing :: Markup :: Markdown",
+]
+
+[project.scripts]
+article-pipeline = "article_pipeline.cli:main"
+
+[tool.setuptools.package-data]
+article_pipeline = ["templates/**/*"]
