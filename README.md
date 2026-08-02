@@ -189,13 +189,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements.
 
 ## Security and privacy
 
-The CLI uses the Python standard library and sends no article content to an AI provider. `audit-links` makes HTTP requests only to URLs already present in the selected article. Agent or model privacy depends on the model environment you choose.
+The CLI uses the Python standard library and sends no article content to an AI provider. `audit-links` starts with URLs present in the selected article and follows redirects only after validating that each destination resolves to public network addresses. Agent or model privacy depends on the model environment you choose.
 
 Never commit credentials, confidential drafts or licensed source material without authorization. See [SECURITY.md](SECURITY.md).
 
 ## Status
 
-Version 0.3 is an alpha release. It adds machine-readable evidence manifests, claim-local qualifier checks, robust Markdown destination scanning, one aggregate release command and reproducible archives with internal file hashes. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
+Version 0.3.1 is an alpha release. It includes machine-readable evidence manifests, claim-local qualifier checks, robust Markdown destination scanning, one aggregate release command and reproducible archives with internal file hashes. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
 
 ## License
 

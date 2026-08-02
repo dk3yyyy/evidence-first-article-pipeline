@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## 0.3.1 - 2026-08-02
+
+### Fixed
+
+- Made the README's pre-edit master workflow executable as written.
+- Clarified that link auditing validates public-network redirect destinations before following them.
+- Synchronized the tagged release documentation with the tested README on `main`.
+
 ## 0.3.0 - 2026-08-02
 
 ### Added
