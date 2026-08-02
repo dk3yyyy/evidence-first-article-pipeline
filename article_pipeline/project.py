@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from importlib import resources
-from importlib.abc import Traversable
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any
 
