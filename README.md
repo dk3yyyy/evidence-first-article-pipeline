@@ -58,34 +58,35 @@ article-pipeline validate my-article
 Complete the generated evidence package, then run the release gates:
 
 ```bash
-# Record the evidence-sensitive surface before editorial rewriting.
-article-pipeline fingerprint my-article/article.md \
+# Preserve the pre-edit article and record its evidence-sensitive surface.
+cp my-article/article.md my-article/pre-edit-article.md
+article-pipeline fingerprint my-article/pre-edit-article.md \
   --json-out my-article/pre-edit-fingerprint.json
 
-# Compare the edited candidate with the evidence-locked master.
-article-pipeline compare my-article/article.md candidate.md \
+# After editing my-article/article.md, compare it with the preserved master.
+article-pipeline compare my-article/pre-edit-article.md my-article/article.md \
   --json-out comparison.json
 
 # Check citation and source URLs. Authentication blocks are reported separately.
-article-pipeline audit-links candidate.md --json-out links.json
+article-pipeline audit-links my-article/article.md --json-out links.json
 
 # Enforce house style without counting the required draft marker.
-article-pipeline lint-dashes candidate.md --limit 0
+article-pipeline lint-dashes my-article/article.md --limit 0
 
 # Count reader-facing prose after stripping metadata, URLs, images and code.
-article-pipeline wordcount candidate.md --json-out wordcount.json
+article-pipeline wordcount my-article/article.md --json-out wordcount.json
 
 # Detect long sentences copied verbatim from the master edition.
-article-pipeline distinctness my-article/article.md candidate.md
+article-pipeline distinctness my-article/pre-edit-article.md my-article/article.md
 
 # Scan for unsupported experience claims with defaults or custom phrases.
-article-pipeline check-fabrication candidate.md --term "our customers"
+article-pipeline check-fabrication my-article/article.md --term "our customers"
 
 # Render sources.md and claim-ledger.md from the JSON authority files.
 article-pipeline sync my-article
 
 # Run the complete configured gate and save one durable report.
-article-pipeline check my-article --master pre-edit-article.md \
+article-pipeline check my-article --master my-article/pre-edit-article.md \
   --json-out my-article/release-report.json
 
 # Require completed placeholders and web exports for all three visual roles.
@@ -174,13 +175,13 @@ Those remain semantic and human review responsibilities. The tool fails closed w
 ## Development
 
 ```bash
+python -m pip install -e '.[dev]'
 python -m unittest discover -s tests -v
 ruff check article_pipeline tests
 mypy article_pipeline
 coverage run -m unittest discover -s tests
 coverage report
 python -m compileall -q article_pipeline tests
-python -m pip install -e '.[dev]'
 article-pipeline --version
 ```
 
