@@ -1,0 +1,7 @@
+{
+  "$schema": "../schemas/model-provenance.schema.json",
+  "schema_version": 1,
+  "research": {"provider": "{{RESEARCH_PROVIDER}}", "model": "{{RESEARCH_MODEL}}", "verified_at": "{{RESEARCH_MODEL_VERIFIED_AT}}"},
+  "writing": {"provider": "{{WRITING_PROVIDER}}", "model": "{{WRITING_MODEL}}", "verified_at": "{{WRITING_MODEL_VERIFIED_AT}}"},
+  "notes": "{{MODEL_PROVENANCE_NOTES}}"
+}

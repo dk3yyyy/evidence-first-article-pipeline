@@ -35,9 +35,11 @@ class ProjectTests(unittest.TestCase):
             target = Path(td) / "story"
             initialize_project(target)
             for path in target.rglob("*.md"):
-                path.write_text(__import__("re").sub(
-                    r"\{\{[A-Z0-9_ -]+\}\}", "Completed content", path.read_text()
-                ))
+                path.write_text(
+                    __import__("re").sub(
+                        r"\{\{[A-Z0-9_ -]+\}\}", "Completed content", path.read_text()
+                    )
+                )
             (target / "visuals" / "diagram-web.svg").write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>'
             )

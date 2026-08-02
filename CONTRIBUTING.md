@@ -7,7 +7,7 @@ Contributions are welcome when they strengthen evidence integrity, reproducibili
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e .
+python -m pip install -e '.[dev]'
 python -m unittest discover -s tests -v
 ```
 
@@ -24,5 +24,9 @@ Run before opening a pull request:
 
 ```bash
 python -m unittest discover -s tests -v
+ruff check article_pipeline tests
+mypy article_pipeline
+coverage run -m unittest discover -s tests
+coverage report
 python -m compileall -q article_pipeline tests
 ```

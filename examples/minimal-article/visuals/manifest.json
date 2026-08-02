@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/visuals.schema.json",
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "VIS-001",
+      "role": "illustration",
+      "source": "visuals/illustration-source.svg",
+      "export": "visuals/illustration-web.svg",
+      "caption": "Original illustration fixture.",
+      "alt_text": "Folder containing connected evidence and article files",
+      "provenance": "Original repository fixture; Apache-2.0"
+    },
+    {
+      "id": "VIS-002",
+      "role": "informative-image",
+      "source": "visuals/informative-image-source.svg",
+      "export": "visuals/informative-image-web.svg",
+      "caption": "Original informative-image fixture.",
+      "alt_text": "Comparison of local checks and human review",
+      "provenance": "Original repository fixture; Apache-2.0"
+    },
+    {
+      "id": "VIS-003",
+      "role": "diagram",
+      "source": "visuals/diagram-source.svg",
+      "export": "visuals/diagram-web.svg",
+      "caption": "Original diagram fixture.",
+      "alt_text": "Flow from evidence records through checks to human approval",
+      "provenance": "Original repository fixture; Apache-2.0"
+    }
+  ]
+}

@@ -5,12 +5,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from article_pipeline.project import initialize_project
+from tests.test_integrity import complete_machine_package
+
 
 class CliTests(unittest.TestCase):
     def run_cli(self, *args):
         return subprocess.run(
             [sys.executable, "-m", "article_pipeline.cli", *args],
-            text=True, capture_output=True, check=False,
+            text=True,
+            capture_output=True,
+            check=False,
         )
 
     def test_init_and_validate(self):
@@ -50,10 +55,15 @@ class CliTests(unittest.TestCase):
     def test_distinctness_fails_on_long_overlap(self):
         with tempfile.TemporaryDirectory() as td:
             master, candidate = Path(td) / "master.md", Path(td) / "candidate.md"
-            sentence = "This sentence has enough words to be treated as a meaningful verbatim overlap in both drafts."
+            sentence = (
+                "This sentence has enough words to be treated as a meaningful "
+                "verbatim overlap in both drafts."
+            )
             master.write_text(sentence)
             candidate.write_text(sentence)
-            result = self.run_cli("distinctness", str(master), str(candidate), "--minimum-words", "12")
+            result = self.run_cli(
+                "distinctness", str(master), str(candidate), "--minimum-words", "12"
+            )
             self.assertEqual(result.returncode, 1)
 
     def test_fabrication_gate_accepts_custom_terms(self):
@@ -67,6 +77,15 @@ class CliTests(unittest.TestCase):
         result = self.run_cli("wordcount", "/definitely/missing/article.md")
         self.assertEqual(result.returncode, 2)
         self.assertFalse(json.loads(result.stderr)["pass"])
+
+    def test_aggregate_check_command(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "article"
+            initialize_project(root)
+            complete_machine_package(root)
+            result = self.run_cli("check", str(root), "--skip-links")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertTrue(json.loads(result.stdout)["pass"])
 
 
 if __name__ == "__main__":

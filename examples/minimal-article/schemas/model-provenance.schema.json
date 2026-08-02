@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "research", "writing"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "research": {"$ref": "#/$defs/modelRecord"},
+    "writing": {"$ref": "#/$defs/modelRecord"},
+    "notes": {"type": "string"}
+  },
+  "$defs": {
+    "modelRecord": {
+      "type": "object",
+      "required": ["provider", "model", "verified_at"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1},
+        "verified_at": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

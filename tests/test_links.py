@@ -1,6 +1,11 @@
 import unittest
 
-from article_pipeline.links import UnsafeDestinationError, _SafeRedirectHandler, audit_links, extract_links
+from article_pipeline.links import (
+    UnsafeDestinationError,
+    _SafeRedirectHandler,
+    audit_links,
+    extract_links,
+)
 
 
 class LinkTests(unittest.TestCase):

@@ -2,7 +2,6 @@ import unittest
 
 from article_pipeline.fingerprint import compare_text, fingerprint_text
 
-
 MASTER = """# A measured claim
 
 A synthetic run may improve latency from 120 ms to 95 ms for `predict()`.
@@ -20,7 +19,9 @@ predict()
 
 class FingerprintTests(unittest.TestCase):
     def test_unchanged_evidence_surface_passes(self):
-        candidate = MASTER.replace("A synthetic run may improve", "In this synthetic run, the result may improve")
+        candidate = MASTER.replace(
+            "A synthetic run may improve", "In this synthetic run, the result may improve"
+        )
         report = compare_text(MASTER, candidate)
         self.assertTrue(report["pass"], report)
 

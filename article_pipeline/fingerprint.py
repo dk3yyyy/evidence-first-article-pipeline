@@ -1,4 +1,5 @@
 """Deterministic evidence-surface fingerprinting for Markdown drafts."""
+
 from __future__ import annotations
 
 import collections
@@ -7,22 +8,33 @@ import json
 import re
 from typing import Any
 
-URL_RE = re.compile(r"https?://[^)\s>]+")
-LINK_DEST_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
-IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
+from .markdown import STATUS_LINE_RE, extract_destinations
+
 INLINE_CODE_RE = re.compile(r"`([^`\n]+)`")
 FENCE_RE = re.compile(r"```[^\n]*\n.*?```", re.S)
 HEADING_RE = re.compile(r"^#{1,6}\s+.+$", re.M)
 NUMBER_RE = re.compile(r"(?<![\w.])(?:\d+(?:[.,]\d+)*|n\s*=\s*\d+)(?![\w.])", re.I)
 UNIT_RE = re.compile(
     r"\b\d+(?:\.\d+)?\s*(?:kHz|Hz|MHz|GHz|ms|s|%|px|MB|GB|words?|"
-    r"samples?|utterances?|runs?|models?|tokens?)\b", re.I
+    r"samples?|utterances?|runs?|models?|tokens?)\b",
+    re.I,
 )
 CLAIM_ID_RE = re.compile(r"\b(?:CLM|CLAIM)-[A-Za-z0-9_-]+\b", re.I)
 DEFAULT_SCOPE_TERMS = (
-    "may", "can", "could", "appears", "suggests", "reported", "estimated",
-    "among inspected sources", "among the sources inspected", "synthetic",
-    "does not establish", "not demonstrated", "unverified", "preprint",
+    "may",
+    "can",
+    "could",
+    "appears",
+    "suggests",
+    "reported",
+    "estimated",
+    "among inspected sources",
+    "among the sources inspected",
+    "synthetic",
+    "does not establish",
+    "not demonstrated",
+    "unverified",
+    "preprint",
 )
 
 
@@ -31,8 +43,7 @@ def _counter(pattern: re.Pattern[str], text: str) -> collections.Counter[str]:
 
 
 def _status_lines(text: str) -> list[str]:
-    markers = ("DRAFT", "PUBLISHED", "LOCAL DRAFT", "REVIEW")
-    return [line.strip() for line in text.splitlines() if any(m in line for m in markers)]
+    return [match.group(0).strip() for match in STATUS_LINE_RE.finditer(text)]
 
 
 def _scope_counts(text: str, terms: tuple[str, ...]) -> dict[str, int]:
@@ -40,12 +51,17 @@ def _scope_counts(text: str, terms: tuple[str, ...]) -> dict[str, int]:
     return {term: low.count(term.lower()) for term in terms}
 
 
-def fingerprint_text(text: str, scope_terms: tuple[str, ...] = DEFAULT_SCOPE_TERMS) -> dict[str, Any]:
+def fingerprint_text(
+    text: str, scope_terms: tuple[str, ...] = DEFAULT_SCOPE_TERMS
+) -> dict[str, Any]:
     """Return a stable, JSON-serializable fingerprint of protected Markdown surfaces."""
+    destinations = extract_destinations(text)
     result: dict[str, Any] = {
-        "markdown_link_destinations": dict(sorted(_counter(LINK_DEST_RE, text).items())),
-        "raw_urls": dict(sorted(_counter(URL_RE, text).items())),
-        "images": [list(item) for item in IMAGE_RE.findall(text)],
+        "markdown_link_destinations": dict(
+            sorted(collections.Counter(destinations["inline_links"]).items())
+        ),
+        "raw_urls": dict(sorted(collections.Counter(destinations["raw_links"]).items())),
+        "images": [list(item) for item in destinations["images"]],
         "inline_code": dict(sorted(_counter(INLINE_CODE_RE, text).items())),
         "code_fences": FENCE_RE.findall(text),
         "headings_and_order": HEADING_RE.findall(text),
@@ -60,14 +76,23 @@ def fingerprint_text(text: str, scope_terms: tuple[str, ...] = DEFAULT_SCOPE_TER
     return result
 
 
-def compare_text(master: str, candidate: str, scope_terms: tuple[str, ...] = DEFAULT_SCOPE_TERMS) -> dict[str, Any]:
+def compare_text(
+    master: str, candidate: str, scope_terms: tuple[str, ...] = DEFAULT_SCOPE_TERMS
+) -> dict[str, Any]:
     """Fail closed when the candidate changes protected evidence surfaces."""
     before = fingerprint_text(master, scope_terms)
     after = fingerprint_text(candidate, scope_terms)
     exact_fields = (
-        "markdown_link_destinations", "raw_urls", "images", "inline_code",
-        "code_fences", "headings_and_order", "numeric_tokens",
-        "number_unit_tokens", "claim_ids", "status_lines",
+        "markdown_link_destinations",
+        "raw_urls",
+        "images",
+        "inline_code",
+        "code_fences",
+        "headings_and_order",
+        "numeric_tokens",
+        "number_unit_tokens",
+        "claim_ids",
+        "status_lines",
     )
     checks = {field: before[field] == after[field] for field in exact_fields}
     checks["uncertainty_counts_not_reduced"] = all(

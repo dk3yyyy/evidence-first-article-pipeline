@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/sources.schema.json",
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "SRC-001",
+      "title": "Evidence-First Article Pipeline repository",
+      "url": "https://github.com/dk3yyyy/evidence-first-article-pipeline",
+      "publisher": "Joshua Nwachinemere",
+      "published_at": "2026-08-02",
+      "access_level": "full-text",
+      "relevance": "Primary source for repository behavior",
+      "limitations": "Does not establish editorial truth"
+    }
+  ]
+}

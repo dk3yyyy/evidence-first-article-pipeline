@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/claims.schema.json",
+  "schema_version": 1,
+  "claims": [
+    {
+      "id": "CLM-001",
+      "statement": "{{MATERIAL_CLAIM}}",
+      "type": "fact",
+      "source_ids": ["SRC-001"],
+      "required_qualifiers": ["{{CLAIM_QUALIFIER}}"],
+      "scope": "{{CLAIM_SCOPE}}",
+      "status": "verified"
+    }
+  ]
+}

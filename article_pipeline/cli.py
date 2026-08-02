@@ -1,20 +1,24 @@
 """Command-line interface for the evidence-first article pipeline."""
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from . import __version__
 from .archive import create_archive
+from .checks import run_checks
 from .fingerprint import compare_text, fingerprint_text
 from .links import audit_links
 from .linting import check_fabrication, count_words, measure_distinctness, scan_em_dashes
 from .project import initialize_project, validate_project
+from .render import render_evidence_markdown
 
 
-def _emit(payload, output: str | None = None) -> None:
+def _emit(payload: Any, output: str | None = None) -> None:
     rendered = json.dumps(payload, indent=2, ensure_ascii=False)
     if output:
         Path(output).write_text(rendered + "\n", encoding="utf-8")
@@ -22,7 +26,9 @@ def _emit(payload, output: str | None = None) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="article-pipeline", description="Evidence-first technical article production tools")
+    parser = argparse.ArgumentParser(
+        prog="article-pipeline", description="Evidence-first technical article production tools"
+    )
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -39,7 +45,9 @@ def build_parser() -> argparse.ArgumentParser:
     fingerprint.add_argument("article")
     fingerprint.add_argument("--json-out")
 
-    compare = sub.add_parser("compare", help="compare a revised draft with its evidence-locked master")
+    compare = sub.add_parser(
+        "compare", help="compare a revised draft with its evidence-locked master"
+    )
     compare.add_argument("master")
     compare.add_argument("candidate")
     compare.add_argument("--json-out")
@@ -65,10 +73,22 @@ def build_parser() -> argparse.ArgumentParser:
     distinct.add_argument("--minimum-words", type=int, default=12)
     distinct.add_argument("--json-out")
 
-    fabrication = sub.add_parser("check-fabrication", help="scan for unsupported-experience phrases")
+    fabrication = sub.add_parser(
+        "check-fabrication", help="scan for unsupported-experience phrases"
+    )
     fabrication.add_argument("article")
     fabrication.add_argument("--term", action="append", dest="terms")
     fabrication.add_argument("--json-out")
+
+    check = sub.add_parser("check", help="run the complete configured release gate")
+    check.add_argument("path")
+    check.add_argument("--master", help="pre-edit master article for evidence comparison")
+    check.add_argument("--skip-links", action="store_true")
+    check.add_argument("--json-out")
+
+    sync = sub.add_parser("sync", help="render Markdown evidence tables from JSON authority files")
+    sync.add_argument("path")
+    sync.add_argument("--json-out")
 
     package = sub.add_parser("package", help="validate and create a reproducible ZIP archive")
     package.add_argument("path")
@@ -81,7 +101,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "init":
-            _emit({"pass": True, "path": str(Path(args.path).resolve()), "created": initialize_project(Path(args.path), args.force)})
+            _emit(
+                {
+                    "pass": True,
+                    "path": str(Path(args.path).resolve()),
+                    "created": initialize_project(Path(args.path), args.force),
+                }
+            )
             return 0
         if args.command == "validate":
             report = validate_project(Path(args.path), strict=args.strict)
@@ -92,11 +118,16 @@ def main(argv: list[str] | None = None) -> int:
             _emit(report, args.json_out)
             return 0
         if args.command == "compare":
-            report = compare_text(Path(args.master).read_text(encoding="utf-8"), Path(args.candidate).read_text(encoding="utf-8"))
+            report = compare_text(
+                Path(args.master).read_text(encoding="utf-8"),
+                Path(args.candidate).read_text(encoding="utf-8"),
+            )
             _emit(report, args.json_out)
             return 0 if report["pass"] else 1
         if args.command == "audit-links":
-            report = audit_links(Path(args.article).read_text(encoding="utf-8"), args.timeout, args.workers)
+            report = audit_links(
+                Path(args.article).read_text(encoding="utf-8"), args.timeout, args.workers
+            )
             _emit(report, args.json_out)
             return 0 if report["pass"] else 1
         if args.command == "lint-dashes":
@@ -116,11 +147,21 @@ def main(argv: list[str] | None = None) -> int:
             _emit(report, args.json_out)
             return 0 if report["pass"] else 1
         if args.command == "check-fabrication":
-            report = check_fabrication(
-                Path(args.article).read_text(encoding="utf-8"), args.terms
+            report = check_fabrication(Path(args.article).read_text(encoding="utf-8"), args.terms)
+            _emit(report, args.json_out)
+            return 0 if report["pass"] else 1
+        if args.command == "check":
+            report = run_checks(
+                Path(args.path),
+                master=Path(args.master) if args.master else None,
+                skip_links=args.skip_links,
             )
             _emit(report, args.json_out)
             return 0 if report["pass"] else 1
+        if args.command == "sync":
+            report = render_evidence_markdown(Path(args.path))
+            _emit(report, args.json_out)
+            return 0
         if args.command == "package":
             report = create_archive(Path(args.path), Path(args.out), strict=not args.no_strict)
             _emit(report)

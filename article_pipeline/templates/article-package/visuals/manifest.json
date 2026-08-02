@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/visuals.schema.json",
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "VIS-001",
+      "role": "illustration",
+      "source": "visuals/illustration-source.svg",
+      "export": "visuals/illustration-web.svg",
+      "caption": "{{ILLUSTRATION_CAPTION}}",
+      "alt_text": "{{ILLUSTRATION_ALT}}",
+      "provenance": "{{ILLUSTRATION_PROVENANCE}}"
+    },
+    {
+      "id": "VIS-002",
+      "role": "informative-image",
+      "source": "visuals/informative-image-source.svg",
+      "export": "visuals/informative-image-web.svg",
+      "caption": "{{INFORMATIVE_CAPTION}}",
+      "alt_text": "{{INFORMATIVE_ALT}}",
+      "provenance": "{{INFORMATIVE_PROVENANCE}}"
+    },
+    {
+      "id": "VIS-003",
+      "role": "diagram",
+      "source": "visuals/diagram-source.svg",
+      "export": "visuals/diagram-web.svg",
+      "caption": "{{DIAGRAM_CAPTION}}",
+      "alt_text": "{{DIAGRAM_ALT}}",
+      "provenance": "{{DIAGRAM_PROVENANCE}}"
+    }
+  ]
+}

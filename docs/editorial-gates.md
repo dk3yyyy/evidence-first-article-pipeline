@@ -29,3 +29,11 @@ Explicit negations such as `no real callers` are ignored. The scanner is intenti
 - `0`: the gate passed or an informational command completed.
 - `1`: the selected gate found a violation.
 - `2`: invalid input, missing file or another execution error.
+
+## Aggregate release gate
+
+`article-pipeline check <package>` loads `article-pipeline.toml` and runs structural
+validation, source/claim integrity, claim-local qualifier checks, visual validation,
+dash policy, word policy, fabrication scanning and link auditing. Use `--skip-links`
+for a deterministic offline run and `--master` to compare the final article against a
+pre-edit evidence fingerprint.

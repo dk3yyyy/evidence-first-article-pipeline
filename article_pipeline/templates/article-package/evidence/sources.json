@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/sources.schema.json",
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "SRC-001",
+      "title": "{{SOURCE_TITLE}}",
+      "url": "{{SOURCE_URL}}",
+      "publisher": "{{SOURCE_PUBLISHER}}",
+      "published_at": "{{SOURCE_DATE}}",
+      "access_level": "full-text",
+      "relevance": "{{SOURCE_RELEVANCE}}",
+      "limitations": "{{SOURCE_LIMITATIONS}}"
+    }
+  ]
+}

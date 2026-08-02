@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/model-provenance.schema.json",
+  "schema_version": 1,
+  "research": {
+    "provider": "none",
+    "model": "not-used",
+    "verified_at": "2026-08-02"
+  },
+  "writing": {
+    "provider": "none",
+    "model": "not-used",
+    "verified_at": "2026-08-02"
+  },
+  "notes": "Deterministic example fixture authored from repository source."
+}

@@ -1,19 +1,18 @@
 """Concurrent HTTP validation for article citation links."""
+
 from __future__ import annotations
 
 import concurrent.futures
 import ipaddress
-import re
 import socket
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import UTC, datetime
 from typing import Any
 
 from . import __version__
-
-LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\((https?://[^)]+)\)")
-RAW_RE = re.compile(r"(?<!\()https?://[^\s)>]+")
+from .markdown import extract_destinations
 
 
 class UnsafeDestinationError(ValueError):
@@ -21,10 +20,7 @@ class UnsafeDestinationError(ValueError):
 
 
 def extract_links(text: str) -> list[str]:
-    links = LINK_RE.findall(text) + RAW_RE.findall(text)
-    # Sentence punctuation is not part of a bare URL. Parentheses are left
-    # untouched because they can be meaningful URL characters.
-    return sorted(set(url.rstrip(".,;:!?") for url in links))
+    return extract_destinations(text)["links"]
 
 
 def _unsafe_destination(url: str) -> str | None:
@@ -46,7 +42,15 @@ def _unsafe_destination(url: str) -> str | None:
 
 
 class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
+    def redirect_request(
+        self,
+        req: Any,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
         unsafe = _unsafe_destination(newurl)
         if unsafe:
             raise UnsafeDestinationError(unsafe)
@@ -63,9 +67,20 @@ def _check(url: str, timeout: float) -> dict[str, Any]:
     opener = urllib.request.build_opener(_SafeRedirectHandler())
     try:
         with opener.open(request, timeout=timeout) as response:
-            return {"url": url, "status": response.status, "final_url": response.url, "result": "pass"}
+            return {
+                "url": url,
+                "status": response.status,
+                "final_url": response.url,
+                "result": "pass",
+            }
     except UnsafeDestinationError as exc:
-        return {"url": url, "status": None, "final_url": None, "result": "unsafe", "error": str(exc)}
+        return {
+            "url": url,
+            "status": None,
+            "final_url": None,
+            "result": "unsafe",
+            "error": str(exc),
+        }
     except urllib.error.HTTPError as exc:
         result = "blocked" if exc.code in {401, 403, 429} else "fail"
         return {"url": url, "status": exc.code, "final_url": exc.url, "result": result}
@@ -81,6 +96,7 @@ def audit_links(text: str, timeout: float = 20.0, workers: int = 8) -> dict[str,
     counts = {state: sum(item["result"] == state for item in results) for state in states}
     return {
         "pass": counts["fail"] == 0 and counts["unsafe"] == 0,
+        "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "summary": {"total": len(results), **counts},
         "results": results,
     }

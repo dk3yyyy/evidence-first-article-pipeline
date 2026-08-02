@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here.
 
+## 0.3.0 - 2026-08-02
+
+### Added
+
+- Project policy in `article-pipeline.toml`.
+- Machine-readable source, claim, model and visual manifests with JSON Schemas.
+- Claim markers and claim-local required-qualifier validation.
+- Balanced Markdown link parsing with reference-style and code-block handling.
+- `check` aggregate release gate and `sync` evidence-table renderer.
+- Visual file parsing, non-empty checks, alt text, caption and provenance validation.
+- Reproducible archive `MANIFEST.json` with per-file SHA-256 hashes.
+- Complete passing example package.
+- Ruff, mypy and 80% coverage CI gates.
+
 ## 0.2.0 - 2026-08-02
 
 ### Added

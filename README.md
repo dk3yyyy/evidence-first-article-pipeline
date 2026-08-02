@@ -81,6 +81,13 @@ article-pipeline distinctness my-article/article.md candidate.md
 # Scan for unsupported experience claims with defaults or custom phrases.
 article-pipeline check-fabrication candidate.md --term "our customers"
 
+# Render sources.md and claim-ledger.md from the JSON authority files.
+article-pipeline sync my-article
+
+# Run the complete configured gate and save one durable report.
+article-pipeline check my-article --master pre-edit-article.md \
+  --json-out my-article/release-report.json
+
 # Require completed placeholders and web exports for all three visual roles.
 article-pipeline validate my-article --strict
 
@@ -94,6 +101,7 @@ Commands return nonzero exit codes when a gate fails, so they can be used in CI.
 
 ```text
 my-article/
+├── article-pipeline.toml
 ├── brief.md
 ├── sources.md
 ├── claim-ledger.md
@@ -103,9 +111,19 @@ my-article/
 ├── platform-notes.md
 ├── publication-checklist.md
 ├── review-summary.md
+├── evidence/
+│   ├── sources.json
+│   ├── claims.json
+│   └── model-provenance.json
+├── schemas/
+│   ├── sources.schema.json
+│   ├── claims.schema.json
+│   ├── visuals.schema.json
+│   └── model-provenance.schema.json
 └── visuals/
     ├── visual-plan.md
     ├── provenance.md
+    ├── manifest.json
     ├── illustration-source.*
     ├── illustration-web.*
     ├── informative-image-source.*
@@ -113,6 +131,10 @@ my-article/
     ├── diagram-source.*
     └── diagram-web.*
 ```
+
+The JSON evidence files are authoritative. `article-pipeline sync` renders the human-readable Markdown tables from them. Verified claims are connected to article paragraphs with markers such as `<!-- claims: CLM-001 -->`, allowing required qualifiers to be checked within the claim that needs them rather than counted globally.
+
+Project policy lives in `article-pipeline.toml`: word limits, em-dash policy, fabrication phrases, link behavior and required visual roles. See the [machine-readable package format](docs/package-format.md) and the [complete passing example](examples/minimal-article/).
 
 ## Agent and model contract
 
@@ -153,8 +175,12 @@ Those remain semantic and human review responsibilities. The tool fails closed w
 
 ```bash
 python -m unittest discover -s tests -v
+ruff check article_pipeline tests
+mypy article_pipeline
+coverage run -m unittest discover -s tests
+coverage report
 python -m compileall -q article_pipeline tests
-python -m pip install -e .
+python -m pip install -e '.[dev]'
 article-pipeline --version
 ```
 
@@ -168,7 +194,7 @@ Never commit credentials, confidential drafts or licensed source material withou
 
 ## Status
 
-Version 0.2 is an alpha release. The artifact contract and deterministic gates are usable now. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
+Version 0.3 is an alpha release. It adds machine-readable evidence manifests, claim-local qualifier checks, robust Markdown destination scanning, one aggregate release command and reproducible archives with internal file hashes. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
 
 ## License
 

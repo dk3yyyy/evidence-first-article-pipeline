@@ -53,14 +53,29 @@ print('not counted')
         self.assertEqual(report["conservative_count"], 6)
 
     def test_distinctness_reports_long_identical_sentences(self):
-        shared = "This sentence contains exactly enough useful words to trigger the long sentence overlap detector today."
-        report = measure_distinctness(shared + " Unique ending.", shared + " Different ending.", minimum_words=12)
+        shared = (
+            "This sentence contains exactly enough useful words to trigger the "
+            "long sentence overlap detector today."
+        )
+        report = measure_distinctness(
+            shared + " Unique ending.", shared + " Different ending.", minimum_words=12
+        )
         self.assertFalse(report["pass"])
         self.assertEqual(report["overlap_count"], 1)
 
     def test_distinctness_ignores_short_sentences(self):
-        report = measure_distinctness("Short shared sentence.", "Short shared sentence.", minimum_words=12)
+        report = measure_distinctness(
+            "Short shared sentence.", "Short shared sentence.", minimum_words=12
+        )
         self.assertTrue(report["pass"])
+
+    def test_distinctness_normalizes_terminal_punctuation(self):
+        sentence = (
+            "This sentence contains enough words to remain a copied sentence "
+            "despite changed terminal punctuation today"
+        )
+        report = measure_distinctness(sentence + ".", sentence + "!", minimum_words=12)
+        self.assertFalse(report["pass"])
 
     def test_fabrication_gate_flags_configured_phrase(self):
         report = check_fabrication("Our customers rely on this every day.", terms=["our customers"])
@@ -68,7 +83,14 @@ print('not counted')
         self.assertEqual(report["hit_count"], 1)
 
     def test_fabrication_gate_allows_explicit_negation(self):
-        report = check_fabrication("This is synthetic. There were no real callers.", terms=["real callers"])
+        report = check_fabrication(
+            "This is synthetic. There were no real callers.", terms=["real callers"]
+        )
+        self.assertTrue(report["pass"])
+
+    def test_fabrication_gate_ignores_code_and_private_comments(self):
+        text = "```text\nour customers\n```\n<!-- in production -->\n"
+        report = check_fabrication(text)
         self.assertTrue(report["pass"])
 
 

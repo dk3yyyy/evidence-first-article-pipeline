@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["schema_version","sources"],"properties":{"schema_version":{"const":1},"sources":{"type":"array","items":{"type":"object","required":["id","title","url","publisher","published_at","access_level"],"properties":{"id":{"pattern":"^SRC-[A-Z0-9_-]+$"},"url":{"format":"uri"}}}}}}

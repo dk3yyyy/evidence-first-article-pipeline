@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/claims.schema.json",
+  "schema_version": 1,
+  "claims": [
+    {
+      "id": "CLM-001",
+      "statement": "The project stores evidence and release records beside the draft.",
+      "type": "fact",
+      "source_ids": [
+        "SRC-001"
+      ],
+      "required_qualifiers": [],
+      "scope": "Repository package structure",
+      "status": "verified"
+    },
+    {
+      "id": "CLM-002",
+      "statement": "The CLI can run deterministic local checks without a model-provider request.",
+      "type": "fact",
+      "source_ids": [
+        "SRC-001"
+      ],
+      "required_qualifiers": [
+        "can"
+      ],
+      "scope": "Core CLI commands except HTTP link auditing",
+      "status": "verified"
+    }
+  ]
+}

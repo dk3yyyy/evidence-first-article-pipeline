@@ -1,0 +1,19 @@
+schema_version = 1
+
+[editorial]
+em_dash_limit = 0
+minimum_distinct_sentence_words = 12
+fabrication_terms = ["our customers", "customer story", "in production", "real caller", "real user"]
+minimum_words = 0
+maximum_words = 0
+
+[links]
+enabled = true
+allow_blocked = true
+timeout_seconds = 20.0
+workers = 8
+
+[visuals]
+required_roles = ["illustration", "informative-image", "diagram"]
+require_alt_text = true
+require_provenance = true

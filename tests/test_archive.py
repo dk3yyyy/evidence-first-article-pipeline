@@ -1,4 +1,3 @@
-import re
 import tempfile
 import unittest
 import zipfile
@@ -6,6 +5,7 @@ from pathlib import Path
 
 from article_pipeline.archive import create_archive
 from article_pipeline.project import initialize_project
+from tests.test_integrity import complete_machine_package
 
 
 class ArchiveTests(unittest.TestCase):
@@ -20,13 +20,7 @@ class ArchiveTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             project = Path(td) / "article"
             initialize_project(project)
-            for path in project.rglob("*.md"):
-                text = re.sub(r"\{\{[A-Z0-9_ -]+\}\}", "Completed content", path.read_text())
-                path.write_text(text)
-            for name in ("illustration-web.svg", "informative-image-web.svg", "diagram-web.svg"):
-                (project / "visuals" / name).write_text(
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>'
-                )
+            complete_machine_package(project)
             (project / ".private-note").write_text("must not ship")
             output = Path(td) / "article.zip"
             first = create_archive(project, output, strict=True)
@@ -38,6 +32,10 @@ class ArchiveTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertIsNone(archive.testzip())
                 self.assertIn("article.md", archive.namelist())
+                self.assertIn("MANIFEST.json", archive.namelist())
+                manifest = __import__("json").loads(archive.read("MANIFEST.json"))
+                self.assertEqual(manifest["schema_version"], 1)
+                self.assertTrue(all("sha256" in row for row in manifest["files"]))
                 self.assertNotIn(".private-note", archive.namelist())
 
 

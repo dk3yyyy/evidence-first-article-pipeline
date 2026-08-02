@@ -8,6 +8,37 @@ permissions:
   contents: read
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install development tools
+        run: python -m pip install '.[dev]'
+      - name: Ruff
+        run: ruff check article_pipeline tests
+      - name: Mypy
+        run: mypy article_pipeline
+      - name: Coverage
+        run: |
+          coverage run -m unittest discover -s tests
+          coverage report
+      - name: Reproducible wheel
+        run: |
+          mkdir /tmp/wheel-a /tmp/wheel-b
+          SOURCE_DATE_EPOCH=315532800 python -m pip wheel . --no-deps -w /tmp/wheel-a
+          SOURCE_DATE_EPOCH=315532800 python -m pip wheel . --no-deps -w /tmp/wheel-b
+          cmp /tmp/wheel-a/*.whl /tmp/wheel-b/*.whl
+      - name: Installed-wheel smoke test
+        run: |
+          python -m venv /tmp/wheel-smoke
+          /tmp/wheel-smoke/bin/pip install /tmp/wheel-a/*.whl
+          /tmp/wheel-smoke/bin/article-pipeline --version
+          /tmp/wheel-smoke/bin/article-pipeline init /tmp/wheel-project
+          /tmp/wheel-smoke/bin/article-pipeline validate /tmp/wheel-project
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -29,3 +60,5 @@ jobs:
           article-pipeline --version
           article-pipeline init /tmp/example-article
           article-pipeline validate /tmp/example-article
+          article-pipeline check examples/minimal-article --skip-links
+          article-pipeline package examples/minimal-article --out /tmp/minimal-article.zip
