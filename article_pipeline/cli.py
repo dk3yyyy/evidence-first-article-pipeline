@@ -6,9 +6,11 @@ import json
 import sys
 from pathlib import Path
 
+from . import __version__
 from .archive import create_archive
 from .fingerprint import compare_text, fingerprint_text
 from .links import audit_links
+from .linting import check_fabrication, count_words, measure_distinctness, scan_em_dashes
 from .project import initialize_project, validate_project
 
 
@@ -21,7 +23,7 @@ def _emit(payload, output: str | None = None) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="article-pipeline", description="Evidence-first technical article production tools")
-    parser.add_argument("--version", action="version", version="0.1.0")
+    parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
 
     init = sub.add_parser("init", help="create a complete article-package template")
@@ -47,6 +49,26 @@ def build_parser() -> argparse.ArgumentParser:
     links.add_argument("--timeout", type=float, default=20.0)
     links.add_argument("--workers", type=int, default=8)
     links.add_argument("--json-out")
+
+    dashes = sub.add_parser("lint-dashes", help="enforce a visible em-dash limit")
+    dashes.add_argument("article")
+    dashes.add_argument("--limit", type=int, default=0)
+    dashes.add_argument("--json-out")
+
+    words = sub.add_parser("wordcount", help="count normalized reader-facing words two ways")
+    words.add_argument("article")
+    words.add_argument("--json-out")
+
+    distinct = sub.add_parser("distinctness", help="find long verbatim sentence overlap")
+    distinct.add_argument("master")
+    distinct.add_argument("candidate")
+    distinct.add_argument("--minimum-words", type=int, default=12)
+    distinct.add_argument("--json-out")
+
+    fabrication = sub.add_parser("check-fabrication", help="scan for unsupported-experience phrases")
+    fabrication.add_argument("article")
+    fabrication.add_argument("--term", action="append", dest="terms")
+    fabrication.add_argument("--json-out")
 
     package = sub.add_parser("package", help="validate and create a reproducible ZIP archive")
     package.add_argument("path")
@@ -75,6 +97,28 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if report["pass"] else 1
         if args.command == "audit-links":
             report = audit_links(Path(args.article).read_text(encoding="utf-8"), args.timeout, args.workers)
+            _emit(report, args.json_out)
+            return 0 if report["pass"] else 1
+        if args.command == "lint-dashes":
+            report = scan_em_dashes(Path(args.article).read_text(encoding="utf-8"), args.limit)
+            _emit(report, args.json_out)
+            return 0 if report["pass"] else 1
+        if args.command == "wordcount":
+            report = count_words(Path(args.article).read_text(encoding="utf-8"))
+            _emit(report, args.json_out)
+            return 0
+        if args.command == "distinctness":
+            report = measure_distinctness(
+                Path(args.master).read_text(encoding="utf-8"),
+                Path(args.candidate).read_text(encoding="utf-8"),
+                args.minimum_words,
+            )
+            _emit(report, args.json_out)
+            return 0 if report["pass"] else 1
+        if args.command == "check-fabrication":
+            report = check_fabrication(
+                Path(args.article).read_text(encoding="utf-8"), args.terms
+            )
             _emit(report, args.json_out)
             return 0 if report["pass"] else 1
         if args.command == "package":

@@ -69,6 +69,18 @@ article-pipeline compare my-article/article.md candidate.md \
 # Check citation and source URLs. Authentication blocks are reported separately.
 article-pipeline audit-links candidate.md --json-out links.json
 
+# Enforce house style without counting the required draft marker.
+article-pipeline lint-dashes candidate.md --limit 0
+
+# Count reader-facing prose after stripping metadata, URLs, images and code.
+article-pipeline wordcount candidate.md --json-out wordcount.json
+
+# Detect long sentences copied verbatim from the master edition.
+article-pipeline distinctness my-article/article.md candidate.md
+
+# Scan for unsupported experience claims with defaults or custom phrases.
+article-pipeline check-fabrication candidate.md --term "our customers"
+
 # Require completed placeholders and web exports for all three visual roles.
 article-pipeline validate my-article --strict
 
@@ -76,7 +88,7 @@ article-pipeline validate my-article --strict
 article-pipeline package my-article --out dist/my-article.zip
 ```
 
-Commands return nonzero exit codes when a gate fails, so they can be used in CI. All reports are JSON.
+Commands return nonzero exit codes when a gate fails, so they can be used in CI. All reports are JSON. See [Deterministic editorial gates](docs/editorial-gates.md) for normalization rules, defaults and limitations.
 
 ## Article-package contract
 
@@ -156,7 +168,7 @@ Never commit credentials, confidential drafts or licensed source material withou
 
 ## Status
 
-Version 0.1 is an alpha release. The artifact contract and deterministic gates are usable now. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
+Version 0.2 is an alpha release. The artifact contract and deterministic gates are usable now. Platform-specific browser publishing remains intentionally outside the core CLI because editor behavior and disclosure rules change frequently.
 
 ## License
 

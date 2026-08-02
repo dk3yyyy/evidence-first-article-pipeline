@@ -10,6 +10,8 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
+from . import __version__
+
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\((https?://[^)]+)\)")
 RAW_RE = re.compile(r"(?<!\()https?://[^\s)>]+")
 
@@ -55,7 +57,9 @@ def _check(url: str, timeout: float) -> dict[str, Any]:
     unsafe = _unsafe_destination(url)
     if unsafe:
         return {"url": url, "status": None, "final_url": None, "result": "unsafe", "error": unsafe}
-    request = urllib.request.Request(url, headers={"User-Agent": "evidence-first-article-pipeline/0.1"})
+    request = urllib.request.Request(
+        url, headers={"User-Agent": f"evidence-first-article-pipeline/{__version__}"}
+    )
     opener = urllib.request.build_opener(_SafeRedirectHandler())
     try:
         with opener.open(request, timeout=timeout) as response:

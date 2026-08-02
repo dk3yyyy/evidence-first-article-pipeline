@@ -27,6 +27,7 @@ class ArchiveTests(unittest.TestCase):
                 (project / "visuals" / name).write_text(
                     '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>'
                 )
+            (project / ".private-note").write_text("must not ship")
             output = Path(td) / "article.zip"
             first = create_archive(project, output, strict=True)
             first_bytes = output.read_bytes()
@@ -37,6 +38,7 @@ class ArchiveTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertIsNone(archive.testzip())
                 self.assertIn("article.md", archive.namelist())
+                self.assertNotIn(".private-note", archive.namelist())
 
 
 if __name__ == "__main__":

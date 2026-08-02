@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here.
 
+## 0.2.0 - 2026-08-02
+
+### Added
+
+- Reader-visible em-dash linting that preserves required status markers.
+- Dual normalized word counts with a conservative maximum.
+- Long-sentence distinctness checks across master and adapted editions.
+- Configurable unsupported-experience and fabrication phrase scanning.
+- CLI and regression coverage for every new gate.
+
 ## 0.1.0 - 2026-08-02
 
 ### Added
